@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8"?>
+<view:BaseCanvas xmlns:mx="http://www.adobe.com/2006/mxml" 
+				 xmlns:view="rcSpark.common.view.*" 
+				 implements="rcSpark.common.interfaces.IWinCanvas"
+				 width="610" height="450"
+				 >
+	
+	<mx:Metadata>
+		[Event(name="close", type="mx.events.CloseEvent")]
+	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+			import flash.net.sendToURL;
+			
+			import mx.controls.Image;
+			import mx.controls.Label;
+			import mx.core.UIComponent;
+			import mx.events.CloseEvent;
+			
+			import redSpark.resManager.managers.ResManager;
+			
+			
+			private var titleH:int = 50;
+			
+			protected	var		backCom:UIComponent ;
+			protected 	var  	titleBar:UIComponent ;
+			protected 	var 	closeButton : Image ;
+			private 	var 	bg:Bitmap ;
+			private 	var 	titlelabal:TextField;
+			
+			private 	var 	lcloseShade:Bitmap ;
+			private 	var 	rcloseShade:Bitmap ;
+			
+			private 	var 	ltitleShade:Bitmap ;
+			private 	var 	rtitleShade:Bitmap ;
+			
+			/**
+			 * 要设置的 标题
+			 * */
+			private var _title:String = "测试文本";
+			
+			
+			override protected function createChildren():void{
+				super.createChildren();
+				
+				if(!backCom){
+					backCom = new UIComponent();
+					rawChildren.addChildAt(backCom ,0);
+				}
+				
+				if(!bg){
+					bg = new Bitmap();
+					backCom.addChild(bg);
+					try{
+						bg.bitmapData = ResManager.getInstance().getResByUrl("../assets/winbase/win_base_backgb.png").bitmapData.clone();
+					}catch(e:Error){
+						trace("----Error-Ryan.Cao---win_base_backgb.png---Not--Loaded");
+					}
+				}
+				
+				if (!titleBar)
+				{
+					titleBar = new UIComponent();
+					titleBar.height = titleH;
+					backCom.addChild(titleBar);
+					titleBar.alpha = 0;
+					titleBar.graphics.beginFill(0xff0000);
+					titleBar.graphics.drawRect(0,0,unscaledWidth , titleH);
+					titleBar.graphics.endFill();
+				}
+				
+				if (!closeButton)
+				{
+					closeButton = new Image();
+					
+					try{
+						var obj:* = ResManager.getInstance().getResByUrl("../assets/winbase/close_Btn.png");
+						closeButton.source = obj
+						closeButton.width = obj.bitmapData.width;
+						closeButton.height = obj.bitmapData.height;
+					}catch(e:Error){
+						trace("----Error-Ryan.Cao---close_Btn.png---Not--Loaded");
+					}
+					
+					closeButton.focusEnabled = false;
+					closeButton.enabled = enabled;
+					// Add the close button on top of the title/status.
+					backCom.addChild(closeButton);
+					
+					closeButton.owner = this;
+					
+					lcloseShade = new Bitmap();
+					try{
+						lcloseShade.bitmapData= ResManager.getInstance().getResByUrl("../assets/winbase/close_Btn_shade.png").bitmapData.clone();
+					}catch(e:Error){
+						trace("----Error-Ryan.Cao---close_Btn_shade.png---Not--Loaded");
+					}
+					backCom.addChild(lcloseShade);
+					
+					rcloseShade = new Bitmap();
+					try{
+						rcloseShade.bitmapData = ResManager.getInstance().getResByUrl("../assets/winbase/close_Btn_shade.png").bitmapData.clone();
+					}catch(e:Error){
+						
+					}
+					backCom.addChild(rcloseShade);
+					rcloseShade.rotationY = 180;
+				}
+				if(!titlelabal)
+				{
+					titlelabal = new TextField();
+					backCom.addChild(titlelabal);
+					titlelabal.text = title;
+					titlelabal.selectable = false;
+				}
+				
+				isShowAble(true);
+				
+			}
+			
+			override protected function  updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void{
+				super.updateDisplayList(unscaledWidth,unscaledHeight);
+				
+				try{
+					
+					titleBar.width = unscaledWidth;
+					
+					closeButton.x = unscaledWidth - 70;
+					closeButton.y = 30;
+					
+					lcloseShade.x = closeButton.x - 23;
+					lcloseShade.y = closeButton.y - 3 ;
+					rcloseShade.x = closeButton.x + 48;
+					rcloseShade.y = closeButton.y - 3 ;
+					
+					titlelabal.x =( unscaledWidth - titlelabal.width)/2
+					titlelabal.y = 20;
+				}catch(e:*){
+					trace("-----Ryan.Cao---BaseWinCanvas--updateDisplayList--false");
+				}
+			}
+			
+			public function get title():String
+			{
+				return _title;
+			}
+			
+			/**
+			 *  @private
+			 */
+			public function set title(value:String):void
+			{
+				_title = value;
+				if(titlelabal){
+					titlelabal.text = title;
+				}
+			}
+			
+			private function titleBar_mouseDownHandler(evt:MouseEvent):void
+			{
+				this.startDrag();
+			}
+			private function titleBar_mouseUpHandler(evt:MouseEvent):void
+			{
+				this.stopDrag();
+			}
+			private function closeButton_clickHandler(evt:MouseEvent):void
+			{
+				dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+//				ApplicationFacade.getInstance().sendNotification(MenuWinContainer.MENU_WIN_REMOVE,this);
+			}
+			
+			private var mat:Array = [ 1,0,0,0,0,
+				0,2,0,0,0,
+				0,0,1,0,0,
+				0,0,0,1,0 ];
+			private var colorMat:ColorMatrixFilter = new ColorMatrixFilter(mat);
+			
+			private function closeButton_overHandle(evt:MouseEvent):void{
+				//
+				closeButton.filters = [colorMat];
+			}
+			
+			private function closeButton_outHandle(evt:MouseEvent):void{
+				//
+				closeButton.filters = [];
+			}
+			
+			public function isShowAble(value:Boolean):void{
+				if(value){
+					show();
+				}else{
+					hide();
+				}
+			}
+			
+			public function show():void{
+				if(titleBar&&!titleBar.hasEventListener(MouseEvent.MOUSE_DOWN)){
+					titleBar.addEventListener(MouseEvent.MOUSE_DOWN,
+						titleBar_mouseDownHandler);
+					titleBar.addEventListener(MouseEvent.MOUSE_UP,
+						titleBar_mouseUpHandler);
+				}
+				
+				if(closeButton){
+					closeButton.addEventListener(MouseEvent.CLICK,
+						closeButton_clickHandler);
+					closeButton.addEventListener(MouseEvent.MOUSE_OVER , 
+						closeButton_overHandle);
+					closeButton.addEventListener(MouseEvent.MOUSE_OUT,
+						closeButton_outHandle);
+				}
+				
+				addEventListener(MouseEvent.MOUSE_DOWN , thisDownHandle);
+				
+			}
+			
+			private function thisDownHandle(evt:MouseEvent):void
+			{
+//				ApplicationFacade.getInstance().sendNotification(MenuWinContainer.MENU_WIN_ADD,this);
+			}
+			
+			public function hide():void{
+				if(titleBar){
+					titleBar.removeEventListener(MouseEvent.MOUSE_DOWN,
+						titleBar_mouseDownHandler);
+					titleBar.removeEventListener(MouseEvent.MOUSE_UP,
+						titleBar_mouseUpHandler);
+				}
+				
+				if(closeButton){
+					closeButton.removeEventListener(MouseEvent.CLICK,
+						closeButton_clickHandler);
+					closeButton.removeEventListener(MouseEvent.MOUSE_OVER , 
+						closeButton_overHandle);
+					closeButton.removeEventListener(MouseEvent.MOUSE_OUT,
+						closeButton_outHandle);
+				}
+				removeEventListener(MouseEvent.MOUSE_DOWN , thisDownHandle);
+			}
+		]]>
+	</mx:Script>
+</view:BaseCanvas>

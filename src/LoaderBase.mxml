@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="1000" height="800" 
+				preinitialize="init()" xmlns:local="*" xmlns:view="com.cygame.common.view.*">
+	<mx:Script>
+		<![CDATA[
+			import rcSpark.common.view.BaseWinCanvas;
+			
+			import redSpark.resManager.data.URLData;
+			import redSpark.resManager.events.ResEvent;
+			import redSpark.resManager.managers.ResManager;
+			
+			//必要的  资源  初始时加载
+			private var _res:Array = [
+				"../assets/loading/loading.swf","../assets/winbase/close_Btn_shade.png","../assets/winbase/close_Btn.png","../assets/winbase/win_base_backgb.png"
+			];
+			/**
+			 * 加载资源文件
+			 * 只有当资源文件加载完成以后
+			 * 才会去loader对应的地图
+			 * */
+			private function onCreateComplete():void{
+				//循环加载资源文件
+				var ct:LoaderContext = new LoaderContext();
+				ct.applicationDomain = ApplicationDomain.currentDomain;
+				for each(var url:String in _res)
+				{					
+					var urlData:URLData = new URLData(url);
+					ResManager.getInstance().load(urlData.initType,urlData.url,urlData.initLevel,ct,loadResComplete);
+				}
+			}
+			private var count:int = 0;
+			private function loadResComplete(evt:ResEvent):void{
+				count++;
+				if(count == _res.length){
+					//加载 完成 以后
+					var test:TestWin = new TestWin();
+					addChild(test);
+					test.width = 610;
+					test.height = 450;
+				}
+			}
+			
+			private function init():void{
+				onCreateComplete();
+			}
+		]]>
+	</mx:Script>
+</mx:Application>

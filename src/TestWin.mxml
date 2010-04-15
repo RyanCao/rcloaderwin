@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<view:BaseWinCanvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:view="rcSpark.common.view.*" 
+			  prepreinitialize="setRes()" creationComplete="onInit()">
+	<mx:Script>
+		<![CDATA[
+			
+			import mx.controls.Image;
+			
+			import redSpark.resManager.managers.ResManager;
+			
+			private function setRes():void{
+				res = ["http://uimg1.zhubajie.com/200910/23/1539097_1256331475olDS.jpg"];
+			}
+			
+			private function iii():void{
+			}
+			private function onInit():void{
+				img.source = ResManager.getInstance().getResByUrl("http://uimg1.zhubajie.com/200910/23/1539097_1256331475olDS.jpg","movie");
+			}
+		]]>
+	</mx:Script>
+	<mx:Image id="img" width="100%" height="400" y="50" maintainAspectRatio="false"/>
+</view:BaseWinCanvas>
